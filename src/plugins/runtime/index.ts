@@ -1,9 +1,11 @@
 import { createRequire } from "node:module";
+import { spawnAcpDirect } from "../../agents/acp-spawn.js";
 import {
   getApiKeyForModel as getApiKeyForModelRaw,
   resolveApiKeyForProvider as resolveApiKeyForProviderRaw,
 } from "../../agents/model-auth.js";
 import { resolveStateDir } from "../../config/paths.js";
+import { getSessionBindingService } from "../../infra/outbound/session-binding-service.js";
 import { transcribeAudioFile } from "../../media-understanding/transcribe-audio.js";
 import { textToSpeechTelephony } from "../../tts/tts.js";
 import { createRuntimeChannel } from "./runtime-channel.js";
@@ -63,6 +65,24 @@ export function createPluginRuntime(_options: CreatePluginRuntimeOptions = {}): 
     events: createRuntimeEvents(),
     logging: createRuntimeLogging(),
     state: { resolveStateDir },
+    acp: {
+      spawn: (...args: Parameters<typeof spawnAcpDirect>) => spawnAcpDirect(...args),
+    },
+    session: {
+      bind: (...args: Parameters<ReturnType<typeof getSessionBindingService>["bind"]>) =>
+        getSessionBindingService().bind(...args),
+      unbind: (...args: Parameters<ReturnType<typeof getSessionBindingService>["unbind"]>) =>
+        getSessionBindingService().unbind(...args),
+      listBySession: (
+        ...args: Parameters<ReturnType<typeof getSessionBindingService>["listBySession"]>
+      ) => getSessionBindingService().listBySession(...args),
+      resolveByConversation: (
+        ...args: Parameters<ReturnType<typeof getSessionBindingService>["resolveByConversation"]>
+      ) => getSessionBindingService().resolveByConversation(...args),
+      getCapabilities: (
+        ...args: Parameters<ReturnType<typeof getSessionBindingService>["getCapabilities"]>
+      ) => getSessionBindingService().getCapabilities(...args),
+    },
     modelAuth: {
       // Wrap model-auth helpers so plugins cannot steer credential lookups:
       // - agentDir / store: stripped (prevents reading other agents' stores)
