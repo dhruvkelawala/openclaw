@@ -4,6 +4,7 @@ import {
   getApiKeyForModel as getApiKeyForModelRaw,
   resolveApiKeyForProvider as resolveApiKeyForProviderRaw,
 } from "../../agents/model-auth.js";
+import { loadConfig } from "../../config/io.js";
 import { resolveStateDir } from "../../config/paths.js";
 import { transcribeAudioFile } from "../../media-understanding/transcribe-audio.js";
 import { textToSpeechTelephony } from "../../tts/tts.js";
@@ -65,7 +66,15 @@ export function createPluginRuntime(_options: CreatePluginRuntimeOptions = {}): 
     logging: createRuntimeLogging(),
     state: { resolveStateDir },
     acp: {
-      spawn: (...args: Parameters<typeof spawnAcpDirect>) => spawnAcpDirect(...args),
+      spawn: (...args: Parameters<typeof spawnAcpDirect>) => {
+        const cfg = loadConfig();
+        if (!cfg.plugins?.allowAcpSpawn) {
+          throw new Error(
+            "api.runtime.acp.spawn() requires plugins.allowAcpSpawn: true in openclaw.json",
+          );
+        }
+        return spawnAcpDirect(...args);
+      },
     },
     modelAuth: {
       // Wrap model-auth helpers so plugins cannot steer credential lookups:
