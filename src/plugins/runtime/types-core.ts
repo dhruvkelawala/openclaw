@@ -1,11 +1,4 @@
 import type { SpawnAcpParams, SpawnAcpContext, SpawnAcpResult } from "../../agents/acp-spawn.js";
-import type {
-  SessionBindingBindInput,
-  SessionBindingUnbindInput,
-  SessionBindingRecord,
-  SessionBindingCapabilities,
-  ConversationRef,
-} from "../../infra/outbound/session-binding-service.js";
 import type { LogLevel } from "../../logging/levels.js";
 
 export type RuntimeLogger = {
@@ -62,13 +55,6 @@ export type PluginRuntimeCore = {
   };
   acp: {
     spawn: (params: SpawnAcpParams, ctx: SpawnAcpContext) => Promise<SpawnAcpResult>;
-  };
-  session: {
-    bind: (input: SessionBindingBindInput) => Promise<SessionBindingRecord>;
-    unbind: (input: SessionBindingUnbindInput) => Promise<SessionBindingRecord[]>;
-    listBySession: (targetSessionKey: string) => SessionBindingRecord[];
-    resolveByConversation: (ref: ConversationRef) => SessionBindingRecord | null;
-    getCapabilities: (params: { channel: string; accountId: string }) => SessionBindingCapabilities;
   };
   modelAuth: {
     /** Resolve auth for a model. Only provider/model and optional cfg are used. */
