@@ -55,6 +55,13 @@ export type PluginRuntimeCore = {
   };
   acp: {
     spawn: (params: SpawnAcpParams, ctx: SpawnAcpContext) => Promise<SpawnAcpResult>;
+    prompt: (params: {
+      sessionKey: string;
+      text: string;
+      channel?: string;
+      accountId?: string;
+      threadId?: string;
+    }) => Promise<{ runId: string }>;
   };
   modelAuth: {
     /** Resolve auth for a model. Only provider/model and optional cfg are used. */
