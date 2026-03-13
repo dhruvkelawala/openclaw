@@ -145,7 +145,15 @@ function resolveAdapterCapabilities(
   };
 }
 
-const ADAPTERS_BY_CHANNEL_ACCOUNT = new Map<string, SessionBindingAdapter>();
+// Use a global singleton via Symbol.for to survive code-splitting across chunks.
+// Without this, each chunk gets its own Map — Discord registers in one chunk,
+// but plugin spawn reads from another, causing adapterAvailable: false.
+const ADAPTERS_KEY = Symbol.for("openclaw.sessionBindingAdapters");
+const _global = globalThis as unknown as Record<symbol, Map<string, SessionBindingAdapter>>;
+if (!_global[ADAPTERS_KEY]) {
+  _global[ADAPTERS_KEY] = new Map<string, SessionBindingAdapter>();
+}
+const ADAPTERS_BY_CHANNEL_ACCOUNT: Map<string, SessionBindingAdapter> = _global[ADAPTERS_KEY];
 
 export function registerSessionBindingAdapter(adapter: SessionBindingAdapter): void {
   const key = toAdapterKey({
